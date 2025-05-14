@@ -1,92 +1,68 @@
-#include &lt;bits/stdc++.h&gt;
-using namespace std;
-bool LEFT_TO_RIGHT = true;
-bool RIGHT_TO_LEFT = false;
-int searchArr(int a[], int n, int mobile)
-{
-for (int i = 0; i &lt; n; i++)
-if (a[i] == mobile)
-return i + 1;
-}
-.
-int getMobile(int a[], bool dir[], int n)
-{
-int mobile_prev = 0, mobile = 0;
-for (int i = 0; i &lt; n; i++)
-{
-.
-if (dir[a[i]-1] == RIGHT_TO_LEFT &amp;&amp; i!=0)
-{
-if (a[i] &gt; a[i-1] &amp;&amp; a[i] &gt; mobile_prev)
-{
-mobile = a[i];
-mobile_prev = mobile;
-}
-}
-if (dir[a[i]-1] == LEFT_TO_RIGHT &amp;&amp; i!=n-1)
-{
-if (a[i] &gt; a[i+1] &amp;&amp; a[i] &gt; mobile_prev)
-{
-mobile = a[i];
-mobile_prev = mobile;
-}
-}
-}
-if (mobile == 0 &amp;&amp; mobile_prev == 0)
-return 0;
-else
-return mobile;
-}
-int printOnePerm(int a[], bool dir[], int n)
-{
-int mobile = getMobile(a, dir, n);
-int pos = searchArr(a, n, mobile);
+#include <stdio.h>
+#define SIZE 4
 
-if (dir[a[pos - 1] - 1] == RIGHT_TO_LEFT)
-swap(a[pos-1], a[pos-2]);
-else if (dir[a[pos - 1] - 1] == LEFT_TO_RIGHT)
-swap(a[pos], a[pos-1]);
-for (int i = 0; i &lt; n; i++)
-{
-if (a[i] &gt; mobile)
-{
-if (dir[a[i] - 1] == LEFT_TO_RIGHT)
-dir[a[i] - 1] = RIGHT_TO_LEFT;
-else if (dir[a[i] - 1] == RIGHT_TO_LEFT)
-dir[a[i] - 1] = LEFT_TO_RIGHT;
-}
-}
-for (int i = 0; i &lt; n; i++)
-cout &lt;&lt; a[i];
-cout &lt;&lt; &quot; &quot;;
-}
-int fact(int n)
-{
-int res = 1;
-for (int i = 1; i &lt;= n; i++)
-res = res * i;
-return res;
-}
-void printPermutation(int n)
-{
-int a[n];
-bool dir[n];
-for (int i = 0; i &lt; n; i++)
-{
-a[i] = i + 1;
-cout &lt;&lt; a[i];
-}
-cout &lt;&lt; endl;
+#define LEFT -1
+#define RIGHT 1
 
-for (int i = 0; i &lt; n; i++)
-dir[i] = RIGHT_TO_LEFT;
+int isMobile(int a[], int dir[], int i) {
+    if (dir[i] == LEFT && i != 0 && a[i] > a[i - 1])
+        return 1;
+    if (dir[i] == RIGHT && i != SIZE - 1 && a[i] > a[i + 1])
+        return 1;
+    return 0;
+}
 
-for (int i = 1; i &lt; fact(n); i++)
-printOnePerm(a, dir, n);
+int getMobile(int a[], int dir[]) {
+    int mobile = 0;
+    for (int i = 0; i < SIZE; i++)
+        if (isMobile(a, dir, i))
+            if (a[i] > a[mobile] || !isMobile(a, dir, mobile))
+                mobile = i;
+    return isMobile(a, dir, mobile) ? mobile : -1;
 }
-int main()
-{
-int n = 4;
-printPermutation(n);
-return 0;
+
+// Swap elements and their directions
+void swap(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
 }
+
+void printPermutation(int a[]) {
+    for (int i = 0; i < SIZE; i++)
+        printf("%d ", a[i]);
+    printf("\n");
+}
+
+void johnsonTrotter() {
+    int a[SIZE], dir[SIZE];
+    for (int i = 0; i < SIZE; i++) {
+        a[i] = i + 1;
+        dir[i] = LEFT;
+    }
+
+    printPermutation(a);
+
+    while (1) {
+        int mobileIndex = getMobile(a, dir);
+        if (mobileIndex == -1)
+            break;
+
+        int swapWith = mobileIndex + dir[mobileIndex];
+        swap(&a[mobileIndex], &a[swapWith]);
+        swap(&dir[mobileIndex], &dir[swapWith]);
+
+        for (int i = 0; i < SIZE; i++)
+            if (a[i] > a[swapWith])
+                dir[i] = -dir[i];
+
+        printPermutation(a);
+    }
+}
+
+
+int main() {
+    johnsonTrotter();
+    return 0;
+}
+
